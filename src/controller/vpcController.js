@@ -15,10 +15,16 @@ const getSubnetInfo = async (req, res) => {
     return res.json({ status: 200, message: "Subnet info get success", data: data});
 }
 
+const saveSubnetInfo = async (req, res) => {
+    await vpcService.saveSubnetInfo();
+    return res.json({ status: 200, message: "Subnet info saved successfly"});
+}
+
 const vpcController = {
     getVPCInfo,
     getSubnetInfo,
-    saveVPCInfo
+    saveVPCInfo,
+    saveSubnetInfo
 };
 
 export default vpcController;

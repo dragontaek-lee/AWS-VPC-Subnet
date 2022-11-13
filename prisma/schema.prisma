@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Ipv6CidrBlockAssociation {
-  id                              Int     @id @default(autoincrement())
-  vpcId                           Int
-  associationId                   String? @db.VarChar(30)
-  ipv6CidrBlock                   String? @db.VarChar(30)
-  ipv6CidrBlockState              String? @db.VarChar(30)
-  ipv6CidrBlockStateMsg           String? @db.VarChar(30)
-  networkBorderGroup              String? @db.VarChar(30)
-  ipv6Pool                        String? @db.VarChar(30)
-  Vpc                             Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ipv6cidrblockassociation_vpc_id_fk")
+  id                    Int     @id @default(autoincrement())
+  vpcId                 Int
+  associationId         String? @db.VarChar(30)
+  ipv6CidrBlock         String? @db.VarChar(30)
+  ipv6CidrBlockState    String? @db.VarChar(30)
+  networkBorderGroup    String? @db.VarChar(30)
+  ipv6Pool              String? @db.VarChar(30)
+  ipv6CidrBlockStateMsg String? @db.VarChar(30)
+  Vpc                   Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ipv6cidrblockassociation_vpc_id_fk")
 }
 
 model Vpc {
@@ -36,11 +36,32 @@ model Vpc {
 }
 
 model cidrBlockAssociation {
-  id                          Int     @id @default(autoincrement())
-  vpcId                       Int     @unique
-  associationId               String? @db.VarChar(50)
-  cidrBlock                   String? @db.VarChar(50)
-  cidrBlockState              String? @db.VarChar(50)
-  cidrBlockStateStatusMsg     String? @db.VarChar(50)
-  Vpc                         Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cidrblockassociation_vpc_id_fk")
+  id                      Int     @id @default(autoincrement())
+  vpcId                   Int     @unique
+  associationId           String? @db.VarChar(50)
+  cidrBlock               String? @db.VarChar(50)
+  cidrBlockState          String? @db.VarChar(50)
+  cidrBlockStateStatusMsg String? @db.VarChar(50)
+  Vpc                     Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cidrblockassociation_vpc_id_fk")
+}
+
+model Subnet {
+  availablitiyZone        String   @db.VarChar(20)
+  availablityZoneId       String   @db.VarChar(20)
+  availableIpAddressCnt   Int?
+  cidrBlock               String   @db.VarChar(30)
+  defaultForAz            Boolean
+  mapPublicIpOnLaunch     Boolean
+  state                   String   @db.VarChar(20)
+  subnetId                String   @db.VarChar(40)
+  vpcId                   String   @db.VarChar(50)
+  ownerId                 String   @db.VarChar(20)
+  assignIpv6adressOncreat Boolean
+  subnetArn               String   @db.VarChar(200)
+  enableDns64             Boolean
+  ipv6Native              Boolean
+  privateDnsOptType       String?  @db.VarChar(20)
+  dnsA                    Boolean?
+  dnsB                    Boolean?
+  id                      Int      @id @unique @default(autoincrement())
 }

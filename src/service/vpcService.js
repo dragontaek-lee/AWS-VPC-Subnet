@@ -138,10 +138,62 @@ const saveVPCInfo = async () => {
     }
 }
 
+const saveSubnetInfo = async () => {
+    const ec2 = new AWS.EC2();
+    const subnetList = await getSubnetInfo(ec2);
+    for(let subnet of subnetList.Subnets){
+        await prisma.subnet.create({
+            data: {          
+                availablitiyZone: subnet.AvailabilityZone,
+                availablityZoneId: subnet.AvailabilityZoneId,
+                availableIpAddressCnt: subnet.AvailableIpAddressCount,
+                cidrBlock: subnet.CidrBlock,
+                defaultForAz: subnet.DefaultForAz,
+                mapPublicIpOnLaunch: subnet.MapPublicIpOnLaunch,
+                state: subnet.State,
+                subnetId: subnet.SubnetId ,
+                vpcId : subnet.VpcId,
+                ownerId: subnet.OwnerId,
+                assignIpv6adressOncreat: subnet.AssignIpv6AddressOnCreation,
+                subnetArn: subnet.SubnetArn,
+                enableDns64: subnet.EnableDns64,
+                ipv6Native: subnet.Ipv6Native,
+                privateDnsOptType: subnet.PrivateDnsNameOptionsOnLaunch.HostnameType,
+                dnsA: subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsARecord,
+                dnsB: subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsAAAARecord,
+            }
+        })
+
+        const vpc = await prisma.vpc.findUnique({
+            where: {
+                vpcId: subnet.VpcId
+            }
+        })
+
+        //Ipv6CidrBlockAssociationSet could be empty
+        if(subnet.Ipv6CidrBlockAssociationSet.length != 0){
+            for(let cidrblock of vpc.Ipv6CidrBlockAssociationSet){
+                await prisma.ipv6CidrBlockAssociationSet.create({
+                    data:{
+                        vpcId: vpc.id,
+                        AssociationId: cidrblock.AssociationId,
+                        ipv6CidrBlock: cidrblock.Ipv6CidrBlock,
+                        ipv6CidrBlockState: cidrblock.Ipv6CidrBlockState.State,
+                        ipv6CidrBlockStateMsg: cidrblock.Ipv6CidrBlockState.StatusMessage,
+                        networkBorderGroup: cidrblock.NetworkBorderGroup,
+                        ipv6Pool: cidrblock.Ipv6Pool
+                    }
+                })
+            }
+        }
+    }
+}
+
 const vpcService = {
     getVPCInfo,
     getSubnetInfo,
-    saveVPCInfo
+    saveVPCInfo,
+    saveSubnetInfo
 };
 
 export default vpcService;
