@@ -61,6 +61,11 @@ const getVPCDetails = (ec2, vpcList) => {
     })
 }
 
+/**
+ * get detailed info of VPCs
+ *
+ * @return {object} get detailed info of Subnet VPCs
+ */
 const getSubnetInfo = async () => {
     const ec2 = new AWS.EC2();
     let vpcList = await getVPCs(ec2);
@@ -68,6 +73,13 @@ const getSubnetInfo = async () => {
     return getSubnetDetails(ec2, refinedVPCs);
 }
 
+/**
+ * get detailed info of VPCs
+ *
+ * @param {Instance} ec2 ec2 instance
+ * @param {Array} vpcList refined VPC list
+ * @return {object} get detailed info of Subnet VPCs
+ */
 const getSubnetDetails = (ec2, vpcList) => {
     const params = {
         Filters: [{
@@ -84,6 +96,9 @@ const getSubnetDetails = (ec2, vpcList) => {
     })
 }
 
+/**
+ * save VPC detail information to DB
+ */
 const saveVPCInfo = async () => {
     const ec2 = new AWS.EC2();
     const VpcList = await getVPCInfo(ec2);
@@ -138,6 +153,9 @@ const saveVPCInfo = async () => {
     }
 }
 
+/**
+ * save Subnet detail information to DB
+ */
 const saveSubnetInfo = async () => {
     const ec2 = new AWS.EC2();
     const subnetList = await getSubnetInfo(ec2);
