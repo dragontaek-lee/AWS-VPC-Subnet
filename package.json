@@ -1,0 +1,26 @@
+{
+  "name": "aws-vpc-subnet",
+  "version": "1.0.0",
+  "description": "retrieve aws vpc,subnet info",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dragontaek-lee/AWS-VPC-Subnet.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dragontaek-lee/AWS-VPC-Subnet/issues"
+  },
+  "homepage": "https://github.com/dragontaek-lee/AWS-VPC-Subnet#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20"
+  }
+}
