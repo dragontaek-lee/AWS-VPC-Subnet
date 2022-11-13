@@ -5,7 +5,7 @@ import AWS from "aws-sdk";
  *
  * @return {object} data of all available regions(Endpoint, RegionName, OptStatus)
  */
-const getAvailableRegions = async () => {
+const getAvailableRegions = () => {
     const ec2 = new AWS.EC2();
     return new Promise((resolve, reject)=>{
         ec2.describeRegions({},(err,data) => {
