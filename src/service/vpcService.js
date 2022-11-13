@@ -59,8 +59,32 @@ const getVPCDetails = (ec2, vpcList) => {
     })
 }
 
+const getSubnetInfo = async () => {
+    const ec2 = new AWS.EC2();
+    let vpcList = await getVPCs(ec2);
+    let refinedVPCs = refineVPCs(vpcList.Vpcs);
+    return getSubnetDetails(ec2, refinedVPCs);
+}
+
+const getSubnetDetails = (ec2, vpcList) => {
+    const params = {
+        Filters: [{
+            Name: "vpc-id", 
+            Values: vpcList
+        }]
+       };
+
+    return new Promise((resolve, reject)=>{
+        ec2.describeSubnets(params,(err,data)=>{
+            if(err) reject(err);
+            else resolve(data);
+        })
+    })
+}
+
 const vpcService = {
-    getVPCInfo
+    getVPCInfo,
+    getSubnetInfo
 };
 
 export default vpcService;
