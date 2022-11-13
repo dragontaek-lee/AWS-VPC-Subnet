@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import router from "./router/index.js";
 
 const app = express(); 
 const PORT = 3000;
@@ -17,6 +18,8 @@ app.use((error, req, res, next) => {
     next();
 });
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api", router);
 
 app.listen(PORT, () => {
     console.log('app listen on port: ' + PORT);
