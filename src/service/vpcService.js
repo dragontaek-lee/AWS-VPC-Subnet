@@ -1,4 +1,6 @@
 import AWS from "aws-sdk";
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 /**
  * get all VPCs and get detail informations
@@ -82,9 +84,64 @@ const getSubnetDetails = (ec2, vpcList) => {
     })
 }
 
+const saveVPCInfo = async () => {
+    const ec2 = new AWS.EC2();
+    const VpcList = await getVPCInfo(ec2);
+
+    for(let vpc of VpcList.Vpcs){
+        let vpcRes = await prisma.vpc.create({
+            data: {          
+                vpcId: vpc.VpcId,
+                cidrBlock: vpc.CidrBlock,
+                dhcpOptionsId: vpc.DhcpOptionsId,
+                state: vpc.State,
+                ownerId: vpc.OwnerId,
+                instanceTenancy: vpc.InstanceTenancy,
+                cidrBlock: vpc.CidrBlock,
+                isDefault: vpc.IsDefault,
+                tagsKey: vpc.Tags[0],
+                tagValue: vpc.Tags[1]
+            }
+        })
+
+        //Ipv6CidrBlockAssociationSet could be empty
+        if(vpc.Ipv6CidrBlockAssociationSet.length != 0){
+            for(let cidrblock of vpc.Ipv6CidrBlockAssociationSet){
+                await prisma.ipv6CidrBlockAssociationSet.create({
+                    data:{
+                        vpcId: vpcRes.id,
+                        AssociationId: cidrblock.AssociationId,
+                        ipv6CidrBlock: cidrblock.Ipv6CidrBlock,
+                        ipv6CidrBlockState: cidrblock.Ipv6CidrBlockState.State,
+                        ipv6CidrBlockStateMsg: cidrblock.Ipv6CidrBlockState.StatusMessage,
+                        networkBorderGroup: cidrblock.NetworkBorderGroup,
+                        ipv6Pool: cidrblock.Ipv6Pool
+                    }
+                })
+            }
+        }
+
+        //CidrBlockAssociationSet could be empty
+        if(vpc.CidrBlockAssociationSet.length != 0){
+            for(let cidrblock of vpc.CidrBlockAssociationSet){
+                await prisma.cidrBlockAssociation.create({
+                    data:{
+                        vpcId: vpcRes.id,
+                        associationId: cidrblock.AssociationId,
+                        cidrBlock: cidrblock.CidrBlock,
+                        cidrBlockState: cidrblock.CidrBlockState.State,
+                        cidrBlockStateMsg:cidrblock.CidrBlockState.StatusMessage,
+                    }
+                })
+            }
+        }
+    }
+}
+
 const vpcService = {
     getVPCInfo,
-    getSubnetInfo
+    getSubnetInfo,
+    saveVPCInfo
 };
 
 export default vpcService;

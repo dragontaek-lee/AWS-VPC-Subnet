@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Ipv6CidrBlockAssociation {
+  id                              Int     @id @default(autoincrement())
+  vpcId                           Int
+  associationId                   String? @db.VarChar(30)
+  ipv6CidrBlock                   String? @db.VarChar(30)
+  ipv6CidrBlockState              String? @db.VarChar(30)
+  ipv6CidrBlockStateMsg           String? @db.VarChar(30)
+  networkBorderGroup              String? @db.VarChar(30)
+  ipv6Pool                        String? @db.VarChar(30)
+  Vpc                             Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ipv6cidrblockassociation_vpc_id_fk")
+}
+
+model Vpc {
+  id                       Int                        @unique @default(autoincrement())
+  vpcId                    String                     @id @db.VarChar(30)
+  dhcpOptionsId            String                     @db.VarChar(30)
+  state                    String                     @db.VarChar(10)
+  instanceTenancy          String                     @db.VarChar(10)
+  ownerId                  String                     @db.VarChar(20)
+  cidrBlock                String                     @db.VarChar(20)
+  isDefault                Boolean
+  tagsKey                  String?                    @db.VarChar(10)
+  tagsValue                String?                    @db.VarChar(10)
+  nextToken                String?                    @db.VarChar(30)
+  Ipv6CidrBlockAssociation Ipv6CidrBlockAssociation[]
+  cidrBlockAssociation     cidrBlockAssociation?
+}
+
+model cidrBlockAssociation {
+  id                          Int     @id @default(autoincrement())
+  vpcId                       Int     @unique
+  associationId               String? @db.VarChar(50)
+  cidrBlock                   String? @db.VarChar(50)
+  cidrBlockState              String? @db.VarChar(50)
+  cidrBlockStateStatusMsg     String? @db.VarChar(50)
+  Vpc                         Vpc     @relation(fields: [vpcId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cidrblockassociation_vpc_id_fk")
+}
