@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import router from "./router/index.js";
 import dotenv from "dotenv";
+import "./sdk.js";
 
 dotenv.config();
 

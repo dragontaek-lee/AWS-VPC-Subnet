@@ -1,12 +1,10 @@
 import AWS from "aws-sdk";
 
 const getVPCInfo = async () => {
-    AWS.config.getCredentials(function(err) {
-        if (err) console.log(err.stack);
-        else {
-          console.log("Access key:", AWS.config.credentials.accessKeyId);
-        }
-      });
+    //console.log(process.env.AWS_REGION)
+    //const ec2 = new AWS.EC2();
+    // ec2.describeVpcs()
+   
     return "VPCInfo";
 };
 

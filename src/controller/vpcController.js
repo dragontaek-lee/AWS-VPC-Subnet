@@ -5,8 +5,8 @@ const getVPCInfo = async (req, res) => {
     return res.json({ status: 200, message: "VPC info get success", data: data});
 };
 
-const userController = {
+const vpcController = {
     getVPCInfo,
 };
 
-export default userController;
+export default vpcController;
