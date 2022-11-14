@@ -104,7 +104,6 @@ const saveVPCInfo = async () => {
     const VpcList = await getVPCInfo(ec2);
 
     await Promise.all(VpcList.Vpcs.map(async vpc => {
-
         let Ipv6CidrSet = vpc.Ipv6CidrBlockAssociationSet;
         let CidrSet = vpc.CidrBlockAssociationSet;
 
@@ -119,10 +118,10 @@ const saveVPCInfo = async () => {
             data: vpc
         })
 
-          // Ipv6CidrBlockAssociationSet could be empty
-        if(Ipv6CidrSet.length != 0){
+        // Ipv6CidrBlockAssociationSet could be empty
+        if (Ipv6CidrSet.length != 0) {
             Ipv6CidrSet.map(async cidrblock => {
-                cidrblock.vpcId = vpcRes.id;
+                cidrblock.VpcId = vpcRes.id;
                 cidrblock.Ipv6CidrBlockState = cidrblock.Ipv6CidrBlockState.State;
                 cidrblock.Ipv6CidrBlockStateMsg = cidrblock.Ipv6CidrBlockState.StatusMessage;
                 delete cidrblock.Ipv6CidrBlockState;
@@ -134,7 +133,7 @@ const saveVPCInfo = async () => {
         }
         
         //CidrBlockAssociationSet could be empty
-        if(CidrSet.length != 0){
+        if (CidrSet.length != 0) {
             CidrSet.map(async cidrblock => {
                 cidrblock.VpcId = vpcRes.id;
                 cidrblock.CidrBlockState = cidrblock.CidrBlockState.State;
@@ -155,52 +154,45 @@ const saveVPCInfo = async () => {
 const saveSubnetInfo = async () => {
     const ec2 = new AWS.EC2();
     const subnetList = await getSubnetInfo(ec2);
-    for(let subnet of subnetList.Subnets){
+
+    await Promise.all(subnetList.Subnets.map(async subnet => {
+        subnet.PrivateDnsOptType = subnet.PrivateDnsNameOptionsOnLaunch.HostnameType;
+        subnet.DnsA = subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsARecord;
+        subnet.DnsB = subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsAAAARecord;
+        subnet.TagsKey = subnet.Tags[0];
+        subnet.TagsValue = subnet.Tags[1];
+
+        let Ipv6CidrSet = subnet.Ipv6CidrBlockAssociationSet;
+
+        delete subnet.Ipv6CidrBlockAssociationSet;
+        delete subnet.PrivateDnsNameOptionsOnLaunch;
+        delete subnet.Tags;
+
         await prisma.subnet.create({
-            data: {          
-                availablitiyZone: subnet.AvailabilityZone,
-                availablityZoneId: subnet.AvailabilityZoneId,
-                availableIpAddressCnt: subnet.AvailableIpAddressCount,
-                cidrBlock: subnet.CidrBlock,
-                defaultForAz: subnet.DefaultForAz,
-                mapPublicIpOnLaunch: subnet.MapPublicIpOnLaunch,
-                state: subnet.State,
-                subnetId: subnet.SubnetId ,
-                vpcId : subnet.VpcId,
-                ownerId: subnet.OwnerId,
-                assignIpv6adressOncreat: subnet.AssignIpv6AddressOnCreation,
-                subnetArn: subnet.SubnetArn,
-                enableDns64: subnet.EnableDns64,
-                ipv6Native: subnet.Ipv6Native,
-                privateDnsOptType: subnet.PrivateDnsNameOptionsOnLaunch.HostnameType,
-                dnsA: subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsARecord,
-                dnsB: subnet.PrivateDnsNameOptionsOnLaunch.EnableResourceNameDnsAAAARecord,
-            }
+            data: subnet
         })
 
         const vpc = await prisma.vpc.findUnique({
             where: {
-                vpcId: subnet.VpcId
+                VpcId: subnet.VpcId
             }
         })
 
-        //Ipv6CidrBlockAssociationSet could be empty
-        if(subnet.Ipv6CidrBlockAssociationSet.length != 0){
-            for(let cidrblock of vpc.Ipv6CidrBlockAssociationSet){
+        // Ipv6CidrBlockAssociationSet could be empty
+        if (Ipv6CidrSet.length != 0) {
+            Ipv6CidrSet.map(async cidrblock => {
+                cidrblock.VpcId = vpc.id;
+                cidrblock.Ipv6CidrBlockState = cidrblock.Ipv6CidrBlockState.State;
+                cidrblock.Ipv6CidrBlockStateMsg = cidrblock.Ipv6CidrBlockState.StatusMessage;
+                delete cidrblock.Ipv6CidrBlockState;
+
                 await prisma.ipv6CidrBlockAssociationSet.create({
-                    data:{
-                        vpcId: vpc.id,
-                        AssociationId: cidrblock.AssociationId,
-                        ipv6CidrBlock: cidrblock.Ipv6CidrBlock,
-                        ipv6CidrBlockState: cidrblock.Ipv6CidrBlockState.State,
-                        ipv6CidrBlockStateMsg: cidrblock.Ipv6CidrBlockState.StatusMessage,
-                        networkBorderGroup: cidrblock.NetworkBorderGroup,
-                        ipv6Pool: cidrblock.Ipv6Pool
-                    }
+                    data: cidrblock
                 })
-            }
+            })
         }
-    }
+
+    }));
 }
 
 const vpcService = {

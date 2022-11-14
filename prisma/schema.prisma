@@ -36,24 +36,27 @@ model Vpc {
 }
 
 model Subnet {
-  availablitiyZone        String   @db.VarChar(20)
-  availablityZoneId       String   @db.VarChar(20)
-  availableIpAddressCnt   Int?
-  cidrBlock               String   @db.VarChar(30)
-  defaultForAz            Boolean
-  mapPublicIpOnLaunch     Boolean
-  state                   String   @db.VarChar(20)
-  subnetId                String   @db.VarChar(40)
-  vpcId                   String   @db.VarChar(50)
-  ownerId                 String   @db.VarChar(20)
-  assignIpv6adressOncreat Boolean
-  subnetArn               String   @db.VarChar(200)
-  enableDns64             Boolean
-  ipv6Native              Boolean
-  privateDnsOptType       String?  @db.VarChar(20)
-  dnsA                    Boolean?
-  dnsB                    Boolean?
-  id                      Int      @id @unique @default(autoincrement())
+  AvailabilityZone            String   @db.VarChar(20)
+  AvailabilityZoneId          String   @db.VarChar(20)
+  AvailableIpAddressCount     Int?
+  CidrBlock                   String   @db.VarChar(30)
+  DefaultForAz                Boolean
+  MapCustomerOwnedIpOnLaunch  Boolean
+  State                       String   @db.VarChar(20)
+  SubnetId                    String   @db.VarChar(40)
+  VpcId                       String   @db.VarChar(50)
+  OwnerId                     String   @db.VarChar(20)
+  AssignIpv6AddressOnCreation Boolean
+  SubnetArn                   String   @db.VarChar(200)
+  EnableDns64                 Boolean
+  Ipv6Native                  Boolean
+  PrivateDnsOptType           String?  @db.VarChar(20)
+  DnsA                        Boolean?
+  DnsB                        Boolean?
+  id                          Int      @id @unique @default(autoincrement())
+  TagsKey                     String?  @db.VarChar(10)
+  TagsValue                   String?  @db.VarChar(10)
+  MapPublicIpOnLaunch         Boolean
 }
 
 model CidrBlockAssociation {
