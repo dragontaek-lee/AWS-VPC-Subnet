@@ -18,4 +18,4 @@
 
 ## ERD
 
-![13412321](https://user-images.githubusercontent.com/54241139/201528494-9bc5528e-9b43-4710-ac00-281402be3375.PNG)
+![dbDiagram](https://user-images.githubusercontent.com/54241139/201702317-6e3c1ded-13a0-453b-9ce3-976335058587.PNG)
