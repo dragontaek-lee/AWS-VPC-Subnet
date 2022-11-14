@@ -103,54 +103,50 @@ const saveVPCInfo = async () => {
     const ec2 = new AWS.EC2();
     const VpcList = await getVPCInfo(ec2);
 
-    for(let vpc of VpcList.Vpcs){
+    await Promise.all(VpcList.Vpcs.map(async vpc => {
+
+        let Ipv6CidrSet = vpc.Ipv6CidrBlockAssociationSet;
+        let CidrSet = vpc.CidrBlockAssociationSet;
+
+        delete vpc.CidrBlockAssociationSet;
+        delete vpc.Ipv6CidrBlockAssociationSet;
+
+        vpc.TagsKey = vpc.Tags[0];
+        vpc.TagsValue = vpc.Tags[1];
+        delete vpc.Tags;
+
         let vpcRes = await prisma.vpc.create({
-            data: {          
-                vpcId: vpc.VpcId,
-                cidrBlock: vpc.CidrBlock,
-                dhcpOptionsId: vpc.DhcpOptionsId,
-                state: vpc.State,
-                ownerId: vpc.OwnerId,
-                instanceTenancy: vpc.InstanceTenancy,
-                cidrBlock: vpc.CidrBlock,
-                isDefault: vpc.IsDefault,
-                tagsKey: vpc.Tags[0],
-                tagValue: vpc.Tags[1]
-            }
+            data: vpc
         })
 
-        //Ipv6CidrBlockAssociationSet could be empty
-        if(vpc.Ipv6CidrBlockAssociationSet.length != 0){
-            for(let cidrblock of vpc.Ipv6CidrBlockAssociationSet){
-                await prisma.ipv6CidrBlockAssociationSet.create({
-                    data:{
-                        vpcId: vpcRes.id,
-                        AssociationId: cidrblock.AssociationId,
-                        ipv6CidrBlock: cidrblock.Ipv6CidrBlock,
-                        ipv6CidrBlockState: cidrblock.Ipv6CidrBlockState.State,
-                        ipv6CidrBlockStateMsg: cidrblock.Ipv6CidrBlockState.StatusMessage,
-                        networkBorderGroup: cidrblock.NetworkBorderGroup,
-                        ipv6Pool: cidrblock.Ipv6Pool
-                    }
-                })
-            }
-        }
+          // Ipv6CidrBlockAssociationSet could be empty
+        if(Ipv6CidrSet.length != 0){
+            Ipv6CidrSet.map(async cidrblock => {
+                cidrblock.vpcId = vpcRes.id;
+                cidrblock.Ipv6CidrBlockState = cidrblock.Ipv6CidrBlockState.State;
+                cidrblock.Ipv6CidrBlockStateMsg = cidrblock.Ipv6CidrBlockState.StatusMessage;
+                delete cidrblock.Ipv6CidrBlockState;
 
-        //CidrBlockAssociationSet could be empty
-        if(vpc.CidrBlockAssociationSet.length != 0){
-            for(let cidrblock of vpc.CidrBlockAssociationSet){
-                await prisma.cidrBlockAssociation.create({
-                    data:{
-                        vpcId: vpcRes.id,
-                        associationId: cidrblock.AssociationId,
-                        cidrBlock: cidrblock.CidrBlock,
-                        cidrBlockState: cidrblock.CidrBlockState.State,
-                        cidrBlockStateMsg:cidrblock.CidrBlockState.StatusMessage,
-                    }
+                await prisma.ipv6CidrBlockAssociationSet.create({
+                    data: cidrblock
                 })
-            }
+            })
         }
-    }
+        
+        //CidrBlockAssociationSet could be empty
+        if(CidrSet.length != 0){
+            CidrSet.map(async cidrblock => {
+                cidrblock.VpcId = vpcRes.id;
+                cidrblock.CidrBlockState = cidrblock.CidrBlockState.State;
+                cidrblock.CidrBlockStateMsg = cidrblock.CidrBlockState.StatusMessage;
+                delete cidrblock.CidrBlockState;
+
+                await prisma.cidrBlockAssociation.create({
+                    data: cidrblock
+                })
+            })
+        }
+    }));
 }
 
 /**
